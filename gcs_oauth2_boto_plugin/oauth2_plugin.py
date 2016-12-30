@@ -16,6 +16,8 @@
 
 from __future__ import absolute_import
 
+import os
+
 from boto.auth_handler import AuthHandler
 from boto.auth_handler import NotReadyToAuthenticate
 
@@ -49,10 +51,12 @@ class OAuth2ServiceAccountAuth(AuthHandler):
   capability = ['google-oauth2', 's3']
 
   def __init__(self, path, config, provider):
-    if (provider.name == 'google'
-        and config.has_option('Credentials', 'gs_service_key_file')):
-      self.oauth2_client = oauth2_helper.OAuth2ClientFromBotoConfig(config,
-          cred_type=oauth2_client.CredTypes.OAUTH2_SERVICE_ACCOUNT)
+    if provider.name == 'google':
+      if (config.has_option('Credentials', 'gs_service_key_file') or
+          os.environ.get('OAUTH2_SERVICE_PRIVATE_KEY', 
+                         oauth2_helper.SERVICE_PRIVATE_KEY)):
+        self.oauth2_client = oauth2_helper.OAuth2ClientFromBotoConfig(
+           config, cred_type=oauth2_client.CredTypes.OAUTH2_SERVICE_ACCOUNT)
 
       # If we make it to this point, then we will later attempt to authenticate
       # as a service account based on how the boto auth plugins work. This is

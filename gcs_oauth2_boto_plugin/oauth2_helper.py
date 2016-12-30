@@ -28,6 +28,9 @@ from oauth2client.client import OAuth2WebServerFlow
 CLIENT_ID = None
 CLIENT_SECRET = None
 
+SERVICE_CLIENT_ID = None
+SERVICE_PRIVATE_KEY = None
+
 GOOGLE_OAUTH2_PROVIDER_AUTHORIZATION_URI = (
     'https://accounts.google.com/o/oauth2/auth')
 GOOGLE_OAUTH2_PROVIDER_TOKEN_URI = (
@@ -72,10 +75,17 @@ def OAuth2ClientFromBotoConfig(
       'OAuth2', 'provider_token_uri', GOOGLE_OAUTH2_PROVIDER_TOKEN_URI)
 
   if cred_type == oauth2_client.CredTypes.OAUTH2_SERVICE_ACCOUNT:
-    service_client_id = config.get('Credentials', 'gs_service_client_id', '')
+    service_client_id = config.get('Credentials', 'gs_service_client_id', 
+                                   os.environ.get('OAUTH2_SERVICE_CLIENT_ID', 
+                                                  SERVICE_CLIENT_ID))
     private_key_filename = config.get('Credentials', 'gs_service_key_file', '')
-    with open(private_key_filename, 'rb') as private_key_file:
-      private_key = private_key_file.read()
+    if private_key_filename:
+      with open(private_key_filename, 'rb') as private_key_file:
+        private_key = private_key_file.read()
+    else:
+        private_key = os.environ.get('OAUTH2_SERVICE_PRIVATE_KEY', 
+                                     SERVICE_PRIVATE_KEY)
+                           
 
     json_key_dict = None
     try:
@@ -189,6 +199,14 @@ def SetFallbackClientIdAndSecret(client_id, client_secret):
   CLIENT_ID = client_id
   CLIENT_SECRET = client_secret
 
+
+def SetFallbackServiceClientIdAndPrivateKey(client_id, private_key):
+  global SERVICE_CLIENT_ID
+  global SERVICE_PRIVATE_KEY
+
+  SERVICE_CLIENT_ID = client_id
+  SERVICE_PRIVATE_KEY = private_key
+  
 
 def SetLock(lock):
   oauth2_client.token_exchange_lock = lock

@@ -26,5 +26,6 @@ from __future__ import absolute_import
 from gcs_oauth2_boto_plugin import oauth2_plugin
 
 from gcs_oauth2_boto_plugin.oauth2_helper import SetFallbackClientIdAndSecret
+from gcs_oauth2_boto_plugin.oauth2_helper import SetFallbackServiceClientIdAndPrivateKey
 from gcs_oauth2_boto_plugin.oauth2_helper import SetLock
 
